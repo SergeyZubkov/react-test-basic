@@ -1,15 +1,28 @@
 .gallery {
-	padding-top: 100px;
+	padding: 100px 0;
 }
 
 .gallery h1 {
+	color: orange;
 	margin: 0;
+	margin-bottom: 40px;
 }
 
 .gallery-items {
 	padding: 0;
+	margin-bottom: 0;
+	margin-left: -10px;
+	margin-right: -10px;
 	list-style: none;
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: space-between;
+	width: 920px;
 }
 
+.gallery__spinner {
+	position: absolute;
+  	top: 50%;
+  	left: 50%;
+  	transform: translate(-50%, -50%);
+}

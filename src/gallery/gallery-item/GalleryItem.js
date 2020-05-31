@@ -13,8 +13,8 @@ export default ({
 				className="gallery-item__img"
 				src={thumbnail == "self" ? "https://via.placeholder.com/140?text=Gallery" : thumbnail}
 				alt="..."
-				height="100"
-				width="140"
+				height="140"
+				width="200"
 			/>
 			<div className="gallery-item__title">
 				{title}
