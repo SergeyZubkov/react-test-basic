@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import './Gallery.css';
 
 import GalleryItem from './gallery-item/GalleryItem';
+import ErrorMsg from '../error-msg/ErrorMsg';
+import RangeSlider from '../range-slider/RangeSlider';
 
 import dataService from '../services/dataService';
 
@@ -11,7 +13,8 @@ export default class Gallery extends Component {
 	state = {
 		items: [],
 		isLoading: true,
-		timer: null
+		timer: null,
+		error: null
 	}
 
 	componentDidMount() {
@@ -35,7 +38,11 @@ export default class Gallery extends Component {
 				isLoading: false
 			})
 		})
-		.catch(err => console.log(err))
+		.catch(err => this.setState({
+			isError: true,
+			isLoading: false,
+			error: err
+		}))
 	}
 
 
@@ -71,7 +78,8 @@ export default class Gallery extends Component {
 		const {
 			items,
 			isLoading, 
-			timer
+			timer,
+			error
 		} = this.state;
 
 		const sortedItems = this.sorting(items);
@@ -90,7 +98,13 @@ export default class Gallery extends Component {
 			</ul>
 		)
 
-		if(isLoading) content = <img className={"gallery__spinner"} src={spinner} />
+		if(error) content = <ErrorMsg error={error} />
+
+		if(isLoading&&!error) content = <img 
+			className={"gallery__spinner"} 
+			src={spinner}
+			alt="..."
+		/>
 
 		return (	
 			<div className='gallery container'>
@@ -113,6 +127,7 @@ export default class Gallery extends Component {
 				> 
 					Stop auto-refresh
 				</button>
+				<RangeSlider from={25} to={125} value={25}/>
 				{content}
 			</div>
 		)

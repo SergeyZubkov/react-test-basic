@@ -1,0 +1,34 @@
+.range-slider {
+	position: relative;
+	height: 5px;
+	background: #ddd;
+	border: 1px solid #aaa;
+}
+
+.range-slider__highlight {
+	background: orange;
+	display: block;
+	height: 5px;
+}
+
+.range-slider__thumbler {
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	display: block;
+	background: orange;
+	width: 20px;
+	height: 20px;
+	border: 1px solid #aaa;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+.range-slider__step {
+	position: absolute;
+	top: 5px;
+	display: block;
+	width: 1px;
+	height: 5px;
+	background: orange;
+}

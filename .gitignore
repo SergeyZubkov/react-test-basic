@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+Нежелательное поведение thumbler'а компонента RangeSlider.
+Когда происходит moseDown на thumbler'е и курсор выходит за его границу (стрелка при этом изменяется на знакочок not-allowed), то при наступление mouseUp, продолжается движение thumbler'а. 

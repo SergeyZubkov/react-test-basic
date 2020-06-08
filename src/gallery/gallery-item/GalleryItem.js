@@ -11,7 +11,12 @@ export default ({
 		<li className="gallery-item">
 			<img
 				className="gallery-item__img"
-				src={thumbnail == "self" ? "https://via.placeholder.com/140?text=Gallery" : thumbnail}
+				src={
+					thumbnail === "self"
+					||thumbnail === "default" 
+					? "https://via.placeholder.com/140?text=Gallery" 
+					: thumbnail
+				}
 				alt="..."
 				height="140"
 				width="200"
