@@ -14,13 +14,21 @@ export default class Gallery extends Component {
 		items: [],
 		isLoading: true,
 		timer: null,
-		error: null
+		error: null,
+		sliderRangeFrom: 0,
+		sliderRangeTo: 0,
+		sliderRangeValue: 0
 	}
 
 	componentDidMount() {
 		this.handleResponse(
 			this.fetchData()
 		)
+		.then(data => this.setState({
+			sliderRangeFrom: this.sorting(data)[data.length-1].data.num_comments,
+			sliderRangeTo: this.sorting(data)[0].data.num_comments,
+			sliderRangeValue: this.sorting(data)[0].data.num_comments
+		}))
 	}
 
 	fetchData() {
@@ -32,11 +40,15 @@ export default class Gallery extends Component {
 	}
 
 	handleResponse(res) {
-		res.then(data => {
-			this.setState({
-				items: data,
-				isLoading: false
+		return res.then(data => {
+			return new Promise((resolve) => {
+				this.setState({
+					items: data,
+					isLoading: false
+				}, 
+				 () => resolve(data))
 			})
+
 		})
 		.catch(err => this.setState({
 			isError: true,
@@ -45,7 +57,7 @@ export default class Gallery extends Component {
 		}))
 	}
 
-
+	handleSliderRangeChange = (newValue) => this.setState({sliderRangeValue: newValue})
 
 	toggleAutoRefresh = (e) => {
 		e.preventDefault();
@@ -74,16 +86,26 @@ export default class Gallery extends Component {
 		return items.sort(byNumComments);
 	}
 
+	setVisible = (items) => {
+		return items.filter(({data}) => data.num_comments >= this.state.sliderRangeFrom&&data.num_comments <= this.state.sliderRangeValue);
+	}
+
 	render() {
 		const {
 			items,
 			isLoading, 
 			timer,
-			error
+			error,
+			sliderRangeFrom,
+			sliderRangeTo,
+			sliderRangeValue
 		} = this.state;
 
-		const sortedItems = this.sorting(items);
+		const sortedItems = this.sorting(
+			this.setVisible(items)
+		);
 
+		console.count('render')
 		let content = (
 			<ul className="gallery-items">
 				{sortedItems.map(({data}) => (
@@ -127,7 +149,12 @@ export default class Gallery extends Component {
 				> 
 					Stop auto-refresh
 				</button>
-				<RangeSlider from={25} to={125} value={25}/>
+				<RangeSlider 
+					from={sliderRangeFrom} 
+					to={sliderRangeTo} 
+					value={sliderRangeValue} 
+					onChangeRange={this.handleSliderRangeChange}
+				/>
 				{content}
 			</div>
 		)
