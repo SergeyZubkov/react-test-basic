@@ -1,88 +1,85 @@
 import React, {Component} from 'react';
 import './RangeSlider.css';
 
+import {throttle} from 'lodash'
+
 export default class RangeSlider extends Component {
 	constructor(props) {
 		super(props);
 
-		console.log(props)
-
 		this.state = {
-			posHorizontal: 0,
-			to: props.to,
-			from: props.from,
-			stepRange: 100 / (props.to - props.from)
+			posKnob: 0
 		}
 
 		this.refRange = React.createRef();
 	}
-	static getDerivedStateFromProps(props, state) {
-		console.log(this)
-		if (props.to !== state.to||props.from !== state.from) {
-			return {
-				to: props.to,
-				from: props.from,
-				stepRange: 100 / (props.to - props.from)
-			}
-		}
-		return null
+	componentDidMount() {
+		this.maxRange = this.getSliderWidth();
+		console.log(this.maxRange)
 	}
 	getSliderWidth = () => {
 		return this.refRange.current.getBoundingClientRect().width;
 	}
 	getStepRangePx = () => {
-		return (this.getSliderWidth() / 100) * this.state.stepRange;
+		const {to, from} = this.props;
+		return this.getSliderWidth() / (to - from);
+	}
+	calculateValue = () => {
+		const {posKnob} = this.state;
+
+		const {from} = this.props;
+
+		const stepRangePx = this.getStepRangePx();
+
+		return Math.floor(posKnob / stepRangePx) + from;
+	}
+
+	setPosKnob = (e ) => {
+		const currentPosition = e.clientX;
+		const diff = currentPosition - this.startPosition;
+		const {posKnob} = this.state
+		
+		let newPosKnob = posKnob + diff;
+
+		if (newPosKnob < 0) newPosKnob = 0;
+		if (newPosKnob > this.maxRange) newPosKnob = this.maxRange;
+
+		this.setState({posKnob: newPosKnob}, () => this.props.onChangeRange(this.calculateValue()));
+
+	}
+	handleClick = (e) => {
+		if (e.target.classList.contains('range-slider__thumbler')) return 
+
+		this.startPosition = this.state.posKnob + this.refRange.current.getBoundingClientRect().left;
+		this.setPosKnob(e);
 	}
 	handleMouseDown = (e) => {
 		e.preventDefault();
-		const startPosition = e.clientX;
-		const prevPosHorizontal = this.state.posHorizontal;
-		const maxRange = this.getSliderWidth();
+		this.startPosition = e.clientX;
 
-		const trackMouseMovie = (e) => {
-			const currentPosition = e.clientX;
-			const diff = currentPosition - startPosition;
-			
-			let posHorizontal = prevPosHorizontal + diff;
-
-			if (posHorizontal < 0) posHorizontal = 0;
-			if (posHorizontal > maxRange) posHorizontal = maxRange;
-
-			this.setState({posHorizontal})
-
-		}	
+		const throttleSetPosKnob = throttle(this.setPosKnob, 100);
 
 		const handleMouseUp = (e) => {
-			const {
-				posHorizontal,
-				stepRange
-			} = this.state;
 
-			const {from} = this.props;
-
-			const stepRangePx = this.getStepRangePx();
-
-			this.props.onChangeRange(Math.floor(posHorizontal / stepRangePx) + from);
-
-			document.removeEventListener("mousemove", trackMouseMovie);
+			document.removeEventListener("mousemove", throttleSetPosKnob);
 			document.removeEventListener("mouseup", handleMouseUp);
 		}
 
-		document.addEventListener("mousemove", trackMouseMovie);
+		document.addEventListener("mousemove", throttleSetPosKnob);
 
 		document.addEventListener("mouseup", handleMouseUp)
 	}
-	componentDidMount() {
+	componentDidUpdate(prevProps) {
 		const {
 			value,
 			from
 		} = this.props;
 
 
-		if (value) {
+		if (value !== prevProps.value) {
 
 			this.setState({
-				posHorizontal: this.getStepRangePx() * (value - from)
+				posKnob: this.getStepRangePx() * (value - from)
 			});		
 
 		}
@@ -90,18 +87,19 @@ export default class RangeSlider extends Component {
 	render() {
 		const {
 			handleMouseDown,
-			refRange
+			handleClick,
+			refRange,
+			getStepRangePx
 		} = this;
 
 		const {
-			value
+			value,
+			from,
+			to
 		} = this.props;
 
 		const {
-			posHorizontal,
-			stepRange,
-			from,
-			to
+			posKnob
 		} = this.state;
 
 		const numSteps = to - from;
@@ -110,11 +108,12 @@ export default class RangeSlider extends Component {
 			<div 
 				className='range-slider'
 				ref={refRange}
+				onClick={handleClick}
 			>
 				<span
 					className='range-slider__highlight'
 					style={{
-						width: posHorizontal
+						width: posKnob
 					}}
 				>
 				</span>
@@ -122,7 +121,7 @@ export default class RangeSlider extends Component {
 					className='range-slider__thumbler'
 					onMouseDown={handleMouseDown}
 					style={{
-						left: posHorizontal
+						left: posKnob
 					}}
 				>
 				</span>
@@ -131,7 +130,7 @@ export default class RangeSlider extends Component {
 						key={i}
 						className='range-slider__step'
 						style={{
-							left: stepRange  * i  + "%"
+							left: (100 / numSteps)  * i + "%"
 						}}
 						data-step-value={from + i}
 					>

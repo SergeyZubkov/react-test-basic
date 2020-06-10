@@ -57,7 +57,7 @@ export default class Gallery extends Component {
 		}))
 	}
 
-	handleSliderRangeChange = (newValue) => this.setState({sliderRangeValue: newValue})
+	handleSliderRangeChange = (newValue) => console.log(newValue)
 
 	toggleAutoRefresh = (e) => {
 		e.preventDefault();
